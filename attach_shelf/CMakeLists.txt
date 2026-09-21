@@ -11,6 +11,31 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+
+
+# Add the executable
+add_executable(pre_approach_exe src/pre_approach.cpp)
+
+ament_target_dependencies(pre_approach_exe
+  rclcpp
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  tf2
+)
+
+# Install the executable
+install(TARGETS
+  pre_approach_exe
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install launch files
+install(DIRECTORY 
+  launch
+  rviz
+  DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

@@ -1,0 +1,29 @@
+<launch>
+
+  <!-- Declare launch arguments -->
+  <arg name="obstacle" default="0.5"/>
+  <arg name="degrees" default="-90"/>
+
+  <!-- Node definition -->
+  <node
+    pkg="attach_shelf"
+    exec="pre_approach_exe"
+    name="move_robot_node"
+    output="screen"
+    emulate_tty="true">
+
+    <!-- Parameters -->
+    <param name="obstacle" value="$(var obstacle)"/>
+    <param name="degrees" value="$(var degrees)"/>
+
+  </node>
+
+   <node
+        pkg="rviz2"
+        exec="rviz2"
+        name="rviz2"
+        output="screen"
+        args="-d $(find-pkg-share attach_shelf)/rviz/my_robot.rviz"
+    />
+
+</launch>
