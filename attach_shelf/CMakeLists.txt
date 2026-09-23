@@ -12,6 +12,9 @@ find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(custom_interfaces REQUIRED)
 
 
 # Add the executable
@@ -25,9 +28,36 @@ ament_target_dependencies(pre_approach_exe
   tf2
 )
 
+add_executable(approach_service src/approach_service_server.cpp)
+
+ament_target_dependencies(approach_service
+  rclcpp
+  tf2
+  tf2_ros
+  geometry_msgs
+  sensor_msgs
+  std_msgs
+  custom_interfaces
+)
+
+
+# Add the executable
+add_executable(pre_approach_v2_exe src/pre_approach_v2.cpp)
+
+ament_target_dependencies(pre_approach_v2_exe
+  rclcpp
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  tf2
+  custom_interfaces
+)
+
 # Install the executable
 install(TARGETS
   pre_approach_exe
+  pre_approach_v2_exe
+  approach_service
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -35,12 +35,16 @@ public:
 private:
   void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
     geometry_msgs::msg::Twist vel_msg;
+
+    // If first scan determine index at front of robot
     if (first_scan_) {
       front_index_ =
           static_cast<int>(std::round(-msg->angle_min / msg->angle_increment));
       first_scan_ = false;
     }
 
+    // Initial movement forward, check distance at front compare it to obstacle
+    // distance. If not within parameter drive forward
     float front_distance = msg->ranges[front_index_];
     if (front_distance > obstacle_ && !stop_criteria_) {
       vel_msg.linear.x = 0.5;
@@ -48,10 +52,15 @@ private:
       return;
 
     } else {
+      // If within distance parameter stop moving forward and change
+      // stop_criteria_ to true preventing going into drive logic again.
       vel_msg.linear.x = 0.0;
       publisher_vel_->publish(vel_msg);
       stop_criteria_ = true;
     }
+
+    // This should only occur IF stop criteria is true
+    // Find error yaw
     double error_yaw = target_yaw_ - current_yaw_;
     while (error_yaw > M_PI)
       error_yaw -= 2.0 * M_PI;
@@ -80,6 +89,7 @@ private:
 
   void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg) {
     {
+      // Use odom to calculate current_yaw_
       tf2::Quaternion q(
           msg->pose.pose.orientation.x, msg->pose.pose.orientation.y,
           msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
@@ -87,12 +97,15 @@ private:
       double roll, pitch;
       tf2::Matrix3x3(q).getRPY(roll, pitch, current_yaw_);
 
+      // Once stop_criteria_ is allowed i.e. we have completed driving forward
+      // section AND this is the first time we've stopped we find starting_yaw_
+      // for our turn We also use that to calculate our target_yaw_ Set
+      // first_stop_ to false preventing recalculating of target/starting yaw
       if (stop_criteria_ && first_stop_) {
         starting_yaw_ = current_yaw_;
         first_stop_ = false;
         target_yaw_ = starting_yaw_ + M_PI * degrees_ / 180;
       }
-      // yaw is your heading in radians
     }
   }
 
